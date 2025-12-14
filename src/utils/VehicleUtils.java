@@ -37,7 +37,7 @@ public final class VehicleUtils{
     }
 
     public static void printModelsPrices(Vehicle vehicle) {
-        System.out.print(vehicle.toString());
+        System.out.print(vehicle);
     }
 
     public static void outputVehicle(Vehicle vehicle, OutputStream out) throws IOException{
@@ -133,27 +133,17 @@ public final class VehicleUtils{
         String brand = scanner.nextLine();
         int length = Integer.parseInt(scanner.nextLine());
 
-        Vehicle v;
-        switch (className) {
-            case "Automobile":
-                v = new Automobile(brand, 0);
-                break;
-            case "Motorcycle":
-                v = new Motorcycle(brand, 0);
-                break;
-            case "Scooter":
-                v = new Scooter(brand, 0);
-                break;
-            case "Atv":
-                v = new Atv(brand, 0);
-                break;
-            case "Moped":
-                v = new Moped(brand, 0);
-                break;
-            default:
+        Vehicle v = switch (className) {
+            case "Automobile" -> new Automobile(brand, 0);
+            case "Motorcycle" -> new Motorcycle(brand, 0);
+            case "Scooter" -> new Scooter(brand, 0);
+            case "Atv" -> new Atv(brand, 0);
+            case "Moped" -> new Moped(brand, 0);
+            default -> {
                 scanner.close();
                 throw new IllegalArgumentException("Неизвестный класс транспортного средства: " + className);
-        }
+            }
+        };
 
         for (int i = 0; i < length; i++) {
             String modelName = scanner.nextLine();

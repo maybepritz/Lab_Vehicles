@@ -1,62 +1,105 @@
-import threads.NameThread;
-import threads.PriceThread;
+import threads.*;
 import vehicles.Automobile;
+import vehicles.Motorcycle;
+import vehicles.Scooter;
 import vehicles.Vehicle;
+import vehicles.Atv;
+
+import threads.ReentrantLock.AllPricesPrinter;
+import threads.ReentrantLock.AllModelsPrinter;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("╔════════════════════════════════════════════════════╗");
-        System.out.println("║   ЛАБОРАТОРНАЯ РАБОТА №4: МНОГОПОТОЧНОСТЬ         ║");
-        System.out.println("╚════════════════════════════════════════════════════╝\n");
-
-        System.out.println("┌─────────────────────────────────────────────────────┐");
-        System.out.println("│ ТЕСТ 1: Равные приоритеты (NORM_PRIORITY)          │");
-        System.out.println("│ Транспорт: Automobile                               │");
-        System.out.println("└─────────────────────────────────────────────────────┘");
-        runTest(Thread.NORM_PRIORITY, Thread.NORM_PRIORITY);
-
-        System.out.println("\n┌─────────────────────────────────────────────────────┐");
-        System.out.println("│ ТЕСТ 2: Поток ЦЕН приоритетнее                      │");
-        System.out.println("│ Цены: MAX_PRIORITY (10) | Имена: MIN_PRIORITY (1)   │");
-        System.out.println("│ Транспорт: Automobile                               │");
-        System.out.println("└─────────────────────────────────────────────────────┘");
-        runTest(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY);
-
-        System.out.println("\n┌─────────────────────────────────────────────────────┐");
-        System.out.println("│ ТЕСТ 3: Поток ИМЕН приоритетнее                     │");
-        System.out.println("│ Цены: MIN_PRIORITY (1) | Имена: MAX_PRIORITY (10)   │");
-        System.out.println("│ Транспорт: Automobile                               │");
-        System.out.println("└─────────────────────────────────────────────────────┘");
-        runTest(Thread.MIN_PRIORITY, Thread.MAX_PRIORITY);
-
-    }
-
-    private static void runTest(int pricePriority, int namePriority) {
         try {
-            Vehicle vehicle = new Automobile("BMW", 100000);
+            Vehicle vehicle = new Automobile("BMW", 4);
 
-            System.out.println("→ Марка: " + vehicle.getBrand());
-            System.out.println("→ Количество моделей: " + vehicle.getSize() + "\n");
+//             1
+//                PriceThread priceThread = new PriceThread(vehicle);
+//                NameThread nameThread = new NameThread(vehicle);
+//
+//                priceThread.setPriority(Thread.MAX_PRIORITY);
+//                nameThread.setPriority(Thread.MIN_PRIORITY);
+//
+//                priceThread.start();
+//                nameThread.start();
+//
+//             1
 
-            PriceThread priceThread = new PriceThread(vehicle, "ПОТОК_ЦЕН");
-            NameThread nameThread = new NameThread(vehicle, "ПОТОК_ИМЕН");
+            // 2
+//                VehicleSynchronizer sync = new VehicleSynchronizer(vehicle);
+//
+//                Thread modelThread = new Thread(new ModelPrinter(sync));
+//                Thread priceThread = new Thread(new PricePrinter(sync));
+//
+//                modelThread.start();
+//                priceThread.start();
 
-            priceThread.setPriority(pricePriority);
-            nameThread.setPriority(namePriority);
+            // 2
 
-            priceThread.start();
-            nameThread.start();
+            // 3
+//            ReentrantLock lock = new ReentrantLock();
+//
+//            Thread priceThread = new Thread(new AllPricesPrinter(vehicle, lock));
+//            Thread modelThread = new Thread(new AllModelsPrinter(vehicle, lock));
+//
+//            priceThread.start();
+//            modelThread.start();
 
-            priceThread.join();
-            nameThread.join();
+            // 3
 
-        } catch (InterruptedException e) {
-            System.err.println("Основной поток был прерван");
-            Thread.currentThread().interrupt();
+            // 4
+//            Vehicle vehicle1 = new Automobile("1", 2);
+//            Vehicle vehicle2 = new Motorcycle("2", 2);
+//            Vehicle vehicle3 = new Scooter("3", 2);
+//            Vehicle vehicle4 = new Atv("4", 2);
+//
+//            ExecutorService executor = Executors.newFixedThreadPool(2);
+//
+//            executor.execute(new BrandPrinter(vehicle1));
+//            executor.execute(new BrandPrinter(vehicle2));
+//            executor.execute(new BrandPrinter(vehicle3));
+//            executor.execute(new BrandPrinter(vehicle4));
+//
+//            executor.shutdown();
+            // 4
+
+            //5
+            String[] filenames = {
+                    "data/task5/brand1.txt", "data/task5/brand2.txt", "data/task5/brand3.txt",
+                    "data/task5/brand4.txt", "data/task5/brand5.txt"
+            };
+
+            int capacity = 3;
+            BlockingQueue<Vehicle> queue = new ArrayBlockingQueue<>(capacity);
+
+
+            for (String filename : filenames) {
+                Thread thread = new Thread(new VehicleFileReader(filename, queue));
+                thread.start();
+            }
+
+            for (int i = 0; i < filenames.length; i++) {
+                Vehicle vehicle5 = queue.take();
+                System.out.println("Получено из очереди: " + vehicle5.getBrand());
+            }
+            //5
+
         } catch (Exception e) {
             System.err.println("Ошибка: " + e.getMessage());
             e.printStackTrace();
         }
+
+
+
     }
 }
